@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astaroth-Game - Catalogue de Jeux</title>
+    <style>
+        /* CSS pour l'esthétique et le thème */
+        :root {
+            --background-color: #1a1a2e;
+            --text-color: #e0e0e0;
+            --primary-color: #0f3460; /* Couleur des éléments principaux (nav, cartes) */
+            --secondary-color: #e94560; /* Couleur d'accentuation (boutons, barre rouge) */
+            --card-background: #272740; /* Fond des sections et des cartes de jeu */
+            --border-color: #555;
+            --hover-color: #3f5f8a; /* Couleur au survol des liens/boutons */
+            --sidebar-width: 250px;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex; /* Utilisation de flexbox pour la disposition latérale */
+            overflow-x: hidden;
+            min-height: 100vh; /* S'assure que le corps prend au moins toute la hauteur de la vue */
+        }
+
+        /* Sidebar Navigation */
+        nav {
+            background-color: var(--primary-color);
+            color: #fff;
+            width: var(--sidebar-width);
+            flex-shrink: 0; /* Empêche la barre latérale de rétrécir */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Pour pousser le footer en bas */
+            padding-top: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
+            position: sticky; /* Rendre la nav sticky */
+            top: 0; /* La coller en haut */
+            height: 100vh; /* Prendre toute la hauteur de la vue */
+            overflow-y: auto; /* Permet de scroller si le contenu est trop long */
+        }
+
+        nav .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1; /* Permet à la liste de prendre l'espace restant */
+        }
+
+        nav ul li {
+            position: relative;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            padding: 1rem 1.5rem;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+
+        nav ul li a:hover,
+        nav ul li a.active { /* 'active' class for current section */
+            background-color: var(--hover-color);
+        }
+
+        .dropdown-content {
+            display: none;
+            background-color: var(--primary-color);
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-content a {
+            color: white;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+        }
+
+        .dropdown-content a:hover {
+            background-color: var(--hover-color);
+        }
+
+        .nav-footer {
+            width: 100%;
+            background-color: var(--secondary-color);
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+            font-weight: bold;
+            margin-top: auto; /* Pousse le footer en bas de la nav */
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex-grow: 1; /* Le contenu principal prend l'espace restant */
+            padding: 20px;
+            overflow-y: auto; /* Permet le défilement si le contenu est long */
+            height: 100vh; /* Prendre toute la hauteur de la vue */
+        }
+
+        /* Sections */
+        section {
+            padding: 40px;
+            margin-bottom: 20px;
+            background-color: var(--card-background);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: none; /* Toutes les sections sont cachées par défaut */
+        }
+
+        section.active {
+            display: block; /* Seule la section active est affichée */
+        }
+
+        section h2 {
+            text-align: center;
+            color: var(--text-color);
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+        }
+
+        /* Catalogue Search Bar */
+        #catalogue .search-bar {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        #catalogue .search-bar input[type="text"] {
+            width: 80%;
+            max-width: 500px;
+            padding: 12px 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            font-size: 1rem;
+            outline: none;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+            transition: border-color 0.3s ease;
+        }
+
+        #catalogue .search-bar input[type="text"]::placeholder {
+            color: #aaa;
+        }
+
+        #catalogue .search-bar input[type="text"]:focus {
+            border-color: var(--secondary-color);
+        }
+
+
+        /* Game Catalogue */
+        #catalogue .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .game-card {
+            background-color: var(--primary-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            text-align: center;
+            padding: 15px;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .game-card h3 {
+            color: var(--text-color);
+            font-size: 1.3rem;
+            margin: 10px 0 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Game Player */
+        #game-player-section {
+            padding: 20px;
+            background-color: var(--card-background);
+            border-radius: 8px;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #game-iframe-wrapper {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio (height / width * 100) */
+            height: 0;
+            background-color: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        #game-iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        #fullscreen-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        #fullscreen-btn:hover {
+            background-color: #c4324f; /* Darker shade */
+        }
+
+        /* Loading Screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 2000;
+            color: white;
+            font-size: 1.5rem;
+            display: none; /* Hidden by default */
+        }
+
+        .spinner {
+            border: 8px solid rgba(255, 255, 255, 0.3);
+            border-top: 8px solid var(--secondary-color);
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Import Section */
+        #import-section {
+            padding: 20px;
+            text-align: center;
+        }
+
+        #import-section input[type="file"] {
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: var(--primary-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #import-section button {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        #import-section button:hover {
+            background-color: #c4324f;
+        }
+
+        /* Theme Customization */
+        #theme-customization {
+            padding: 20px;
+            text-align: center;
+        }
+
+        #theme-customization label {
+            margin-right: 10px;
+        }
+
+        #theme-customization input[type="color"] {
+            width: 50px;
+            height: 30px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            vertical-align: middle;
+            margin-right: 20px;
+        }
+
+        /* About Section */
+        #about-section {
+            padding: 20px;
+            text-align: center;
+        }
+
+        #about-section p {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .empty-catalogue-message {
+            text-align: center;
+            font-style: italic;
+            color: var(--text-color);
+            margin-top: 50px;
+            font-size: 1.2rem;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="loading-screen">
+        <div class="spinner"></div>
+        <p>Chargement du jeu...</p>
+    </div>
+
+    <nav>
+        <div class="logo">Astaroth-Game</div>
+        <ul>
+            <li class="dropdown">
+                <a href="#about-section" class="nav-link">À Propos</a>
+                <div class="dropdown-content">
+                    <a href="#" class="nav-link-sub">Fait par AstarothDevTeam</a>
+                    <a href="#" class="nav-link-sub">Fait avec Crazy game</a>
+                </div>
+            </li>
+            <li><a href="#catalogue" class="nav-link active">Catalogue</a></li>
+            <li><a href="#import-section" class="nav-link">Importer des jeux</a></li>
+            <li><a href="#theme-customization" class="nav-link">Thème</a></li>
+        </ul>
+        <div class="nav-footer">
+            AstarothDevTeam
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <section id="game-player-section">
+            <h2>Lecteur de Jeu</h2>
+            <div id="game-iframe-wrapper">
+                <iframe id="game-iframe" src="" allowfullscreen="" sandbox="allow-forms allow-modals allow-orientation-lock allow-pointer-lock allow-presentation allow-scripts allow-same-origin allow-downloads allow-popups allow-popups-to-escape-sandbox"></iframe>
+            </div>
+            <button id="fullscreen-btn">Plein Écran</button>
+        </section>
+
+        <section id="catalogue" class="active"> <h2>Catalogue de Jeux</h2>
+            <div class="search-bar">
+                <input type="text" id="gameSearchInput" placeholder="Rechercher un jeu...">
+            </div>
+            <div class="game-grid" id="game-list">
+                <p class="empty-catalogue-message">Veuillez importer un fichier TXT contenant des jeux pour les afficher ici.</p>
+            </div>
+        </section>
+
+        <section id="import-section">
+            <h2>Importer des Jeux</h2>
+            <p>Importez un fichier .txt contenant des iframes de jeux.</p>
+            <input type="file" id="importFileInput" accept=".txt">
+            <button id="importFileBtn">Importer</button>
+        </section>
+
+        <section id="theme-customization">
+            <h2>Personnaliser le Thème</h2>
+            <div>
+                <label for="bgColor">Couleur de Fond:</label>
+                <input type="color" id="bgColor" value="#1a1a2e">
+
+                <label for="textColor">Couleur du Texte:</label>
+                <input type="color" id="textColor" value="#e0e0e0">
+
+                <label for="primaryColor">Couleur Principale:</label>
+                <input type="color" id="primaryColor" value="#0f3460">
+
+                <label for="secondaryColor">Couleur Secondaire:</label>
+                <input type="color" id="secondaryColor" value="#e94560">
+
+                <label for="cardBgColor">Fond des Cartes:</label>
+                <input type="color" id="cardBgColor" value="#272740">
+            </div>
+        </section>
+
+        <section id="about-section">
+            <h2>À Propos</h2>
+            <p>Bienvenue sur Astaroth-Game, votre catalogue de jeux personnel !</p>
+            <p>Ce projet est <span style="font-weight: bold;">Fait par AstarothDevTeam</span> et propulsé par des jeux de <span style="font-weight: bold;">Crazy game</span>.</p>
+            <p>Profitez d'une expérience de jeu immersive et personnalisable.</p>
+            <p>Il est possible que certain juex soit bloqué dans ce cas prévenez moi  r-a.de.lagrevol@outlook.com et le jeu sera débloquée                          en 2 semaine</p>
+        </section>
+    </div>
+
+    <script>
+        // JavaScript pour la logique du jeu
+        document.addEventListener('DOMContentLoaded', () => {
+            const gameList = document.getElementById('game-list');
+            const gameIframe = document.getElementById('game-iframe');
+            const gamePlayerSection = document.getElementById('game-player-section');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            const loadingScreen = document.getElementById('loading-screen');
+            const importFileInput = document.getElementById('importFileInput');
+            const importFileBtn = document.getElementById('importFileBtn');
+            const gameSearchInput = document.getElementById('gameSearchInput'); // New search input
+
+            // Theme customization inputs
+            const bgColorInput = document.getElementById('bgColor');
+            const textColorInput = document.getElementById('textColor');
+            const primaryColorInput = document.getElementById('primaryColor');
+            const secondaryColorInput = document.getElementById('secondaryColor');
+            const cardBgColorInput = document.getElementById('cardBgColor');
+
+            let games = []; // Games array is empty by default, must be imported
+            let filteredGames = []; // New array to hold filtered games
+
+            // Function to show only the selected section
+            const showSection = (sectionId) => {
+                const sections = document.querySelectorAll('section');
+                sections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(sectionId).classList.add('active');
+
+                // Update active class for nav links
+                const navLinks = document.querySelectorAll('.nav-link');
+                navLinks.forEach(link => {
+                    if (link.getAttribute('href') === `#${sectionId}`) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+                 // Hide dropdown sub-links active state as they don't map to a section directly
+                const navSubLinks = document.querySelectorAll('.nav-link-sub');
+                navSubLinks.forEach(link => link.classList.remove('active'));
+
+                // Scroll to top of the main content area for better UX
+                document.querySelector('.main-content').scrollTop = 0;
+            };
+
+            const renderGameCards = () => {
+                gameList.innerHTML = ''; // Clear existing cards
+
+                const gamesToRender = gameSearchInput.value ? filteredGames : games;
+
+                if (gamesToRender.length === 0) {
+                    const message = document.createElement('p');
+                    message.classList.add('empty-catalogue-message');
+                    message.textContent = gameSearchInput.value ? 'Aucun jeu trouvé pour cette recherche.' : 'Veuillez importer un fichier TXT contenant des jeux pour les afficher ici.';
+                    gameList.appendChild(message);
+                } else {
+                    gamesToRender.forEach(game => {
+                        const gameCard = document.createElement('div');
+                        gameCard.classList.add('game-card');
+                        gameCard.innerHTML = `<h3>${game.title}</h3>`;
+                        gameCard.addEventListener('click', () => loadGame(game.src));
+                        gameList.appendChild(gameCard);
+                    });
+                }
+            };
+
+            const loadGame = (src) => {
+                showSection('game-player-section'); // Show the game player section
+                loadingScreen.style.display = 'flex'; // Show loading screen
+                gameIframe.src = src;
+
+                gameIframe.onload = () => {
+                    loadingScreen.style.display = 'none'; // Hide loading screen
+                };
+                gameIframe.onerror = () => {
+                    loadingScreen.style.display = 'none'; // Hide loading screen on error
+                    alert('Erreur lors du chargement du jeu. Veuillez réessayer.');
+                };
+
+                // No need to scroll to game player section as showSection already handles it
+            };
+
+            fullscreenBtn.addEventListener('click', () => {
+                if (gameIframe.requestFullscreen) {
+                    gameIframe.requestFullscreen();
+                } else if (gameIframe.mozRequestFullScreen) { /* Firefox */
+                    gameIframe.mozRequestFullScreen();
+                } else if (gameIframe.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+                    gameIframe.webkitRequestFullscreen();
+                } else if (gameIframe.msRequestFullscreen) { /* IE/Edge */
+                    gameIframe.msRequestFullscreen();
+                }
+            });
+
+            importFileBtn.addEventListener('click', () => {
+                const file = importFileInput.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const content = e.target.result;
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(content, 'text/html');
+                        const iframes = doc.querySelectorAll('iframe');
+                        const newGames = [];
+                        iframes.forEach(iframe => {
+                            const title = iframe.getAttribute('title');
+                            const src = iframe.getAttribute('src');
+                            if (title && src) {
+                                newGames.push({ title, src });
+                            }
+                        });
+
+                        if (newGames.length > 0) {
+                            // Only add new games if they don't already exist to prevent duplicates
+                            newGames.forEach(newGame => {
+                                if (!games.some(game => game.src === newGame.src)) {
+                                    games.push(newGame);
+                                }
+                            });
+                            games.sort((a, b) => a.title.localeCompare(b.title)); // Sort games alphabetically
+                            filterGames(); // Apply current search filter after import
+                            alert(`${newGames.length} jeux uniques importés avec succès !`);
+                            showSection('catalogue'); // Automatically show catalogue after import
+                        } else {
+                            alert("Aucun jeu valide trouvé dans le fichier. Assurez-vous que le fichier contient des balises <iframe> avec 'title' et 'src'.");
+                        }
+                    };
+                    reader.readAsText(file);
+                } else {
+                    alert("Veuillez sélectionner un fichier TXT à importer.");
+                }
+            });
+
+            // Function to filter games based on search input
+            const filterGames = () => {
+                const searchTerm = gameSearchInput.value.toLowerCase();
+                if (searchTerm) {
+                    filteredGames = games.filter(game =>
+                        game.title.toLowerCase().includes(searchTerm)
+                    );
+                } else {
+                    filteredGames = [...games]; // Show all games if search term is empty
+                }
+                renderGameCards();
+            };
+
+            // Event listener for search input
+            gameSearchInput.addEventListener('input', filterGames);
+
+
+            // Theme customization functionality
+            const root = document.documentElement;
+
+            bgColorInput.addEventListener('input', (e) => {
+                root.style.setProperty('--background-color', e.target.value);
+            });
+            textColorInput.addEventListener('input', (e) => {
+                root.style.setProperty('--text-color', e.target.value);
+            });
+            primaryColorInput.addEventListener('input', (e) => {
+                root.style.setProperty('--primary-color', e.target.value);
+            });
+            secondaryColorInput.addEventListener('input', (e) => {
+                root.style.setProperty('--secondary-color', e.target.value);
+            });
+            cardBgColorInput.addEventListener('input', (e) => {
+                root.style.setProperty('--card-background', e.target.value);
+            });
+
+            // Attach event listeners to navigation links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (event) => {
+                    event.preventDefault(); // Prevent default anchor behavior
+                    const targetId = link.getAttribute('href').substring(1); // Get section ID
+                    showSection(targetId);
+                });
+            });
+
+            // Initial render of game cards (will show empty message)
+            renderGameCards();
+
+            // Set default active section on load (e.g., catalogue)
+            showSection('catalogue');
+        });
+    </script>
+</body>
+</html>
